@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Элементы решения/">
+    <File Path="doc/ARCHITECTURE.md" />
+    <File Path="doc/rules/ENGLISH.md" />
+    <File Path="doc/rules/NTERNATIONAL.md" />
+    <File Path="doc/rules/RUSSIAN.md" />
+    <File Path="doc/SCANNING_ALGORITHM.md" />
+    <File Path="doc/USER_GUIDE.md" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="checkers/Сheckers.csproj" />
+  <Project Path="Tests/Сheckers.Tests.csproj" Id="d8e07fc6-7f93-4997-b579-b476143b32a6">
+    <BuildDependency Project="checkers/Сheckers.csproj" />
+  </Project>
+</Solution>

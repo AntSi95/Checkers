@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<!-- Видимость коментариев для внешних пользователей -->
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<!-- Отключаем навязчивый совет по первичным конструкторам -->
+		<NoWarn>$(NoWarn);IDE0290</NoWarn>
+
+		<!-- метаданные для NuGet -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>Checkers</PackageId>
+		<Version>1.0.0-alpha2</Version>
+		<Authors>AntSi95</Authors>
+		<Company>AntSi95</Company>
+		<Description>Автономный и расширяемый игровой движок для игры в шашки на .NET 10</Description>
+
+		<!-- Привязка пакета к GitHub репозиторию -->
+		<PackageProjectUrl>https://github.com/AntSi95/Checkers</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/AntSi95/Checkers.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		
+	</PropertyGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>Checkers.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+</Project>
