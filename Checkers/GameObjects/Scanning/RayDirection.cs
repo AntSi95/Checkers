@@ -8,16 +8,16 @@
         /// <summary> Направление не определено. </summary>
         None,
 
-        /// <summary> Вверх-влево (уменьшение ряда, уменьшение столбца). </summary>
+        /// <summary> Вверх-влево (увеличение ряда, уменьшение столбца). </summary>
         UpLeft,
 
-        /// <summary> Вверх-вправо (уменьшение ряда, увеличение столбца). </summary>
+        /// <summary> Вверх-вправо (увеличение ряда, увеличение столбца). </summary>
         UpRight,
 
-        /// <summary> Вниз-влево (увеличение ряда, уменьшение столбца). </summary>
+        /// <summary> Вниз-влево (уменьшение ряда, уменьшение столбца). </summary>
         DownLeft,
 
-        /// <summary> Вниз-вправо (увеличение ряда, увеличение столбца). </summary>
+        /// <summary> Вниз-вправо (уменьшение ряда, увеличение столбца). </summary>
         DownRight
     }
 
@@ -27,10 +27,10 @@
     public static class RayDirectionExtensions
     {
         // Кешируем векторы, чтобы не создавать новые объекты Point постоянно
-        private static readonly Point _upLeft = new(-1, -1);
-        private static readonly Point _upRight = new(-1, 1);
-        private static readonly Point _downLeft = new(1, -1);
-        private static readonly Point _downRight = new(1, 1);
+        private static readonly Point _upLeft = new(1, -1);
+        private static readonly Point _upRight = new(1, 1);
+        private static readonly Point _downLeft = new(-1, -1);
+        private static readonly Point _downRight = new(-1, 1);
         private static readonly Point _zero = new(0, 0);
 
         /// <summary>
@@ -65,8 +65,8 @@
         /// <param name="direction">Направление луча.</param>
         /// <param name="side">Сторона (цвет) фигуры.</param>
         /// <remarks>
-        /// Для белых "вперед" — это уменьшение индекса строки (вверх).
-        /// Для черных "вперед" — это увеличение индекса строки (вниз).
+        /// Для белых "вперед" — это увеличение индекса строки (вверх).
+        /// Для черных "вперед" — это уменьшение индекса строки (вниз).
         /// </remarks>
         public static bool IsForwardFor(this RayDirection direction, PieceSide side) => side switch
         {
