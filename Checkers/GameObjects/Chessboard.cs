@@ -96,8 +96,8 @@ namespace Сheckers.GameObjects
         /// <param name="side">Сторона фигуры.</param>
         public bool IsPromotionEdge(Point square, PieceSide side)
         {
-            // Белые идут вверх (Row 0), черные вниз (Row Max-1)
-            return side == PieceSide.White ? square.Row == 0 : square.Row == Rows - 1;
+            // Физическая система (0,0)=A1: Белые идут вверх к Rows-1, черные вниз к Row 0
+            return side == PieceSide.White ? square.Row == Rows - 1 : square.Row == 0;
         }
 
         #endregion
@@ -185,7 +185,6 @@ namespace Сheckers.GameObjects
 
         /// <summary>
         /// Помечает фигуру как готовую к превращению в дамку.
-        /// Фактическое превращение произойдет при вызове финализации.
         /// </summary>
         public void MarkAsPromoted(Point square)
         {
