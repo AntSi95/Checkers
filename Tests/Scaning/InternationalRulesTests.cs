@@ -1,8 +1,8 @@
-﻿using Сheckers.GameObjects;
-using Сheckers.GameObjects.Rules.Checkers.Core.Rules;
-using Сheckers.GameObjects.Scanning;
+﻿using Checkers.GameObjects;
+using Checkers.GameObjects.Rules.Checkers.Core.Rules;
+using Checkers.GameObjects.Scanning;
 
-namespace Сheckers.Tests.Scaning
+namespace Checkers.Tests.Scaning
 {
     public class InternationalRulesTests
     {

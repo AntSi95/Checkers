@@ -1,4 +1,4 @@
-﻿namespace Сheckers.GameObjects.Scanning
+﻿namespace Checkers.GameObjects.Scanning
 {
     /// <summary>
     /// Определяет четыре диагональных направления движения по игровой доске.

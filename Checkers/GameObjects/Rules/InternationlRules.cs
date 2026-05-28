@@ -1,6 +1,6 @@
-﻿using Сheckers.GameObjects.Scanning;
+﻿using Checkers.GameObjects.Scanning;
 
-namespace Сheckers.GameObjects.Rules
+namespace Checkers.GameObjects.Rules
 {
     namespace Checkers.Core.Rules
     {

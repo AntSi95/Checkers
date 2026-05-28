@@ -1,4 +1,4 @@
-﻿namespace Сheckers.GameObjects
+﻿namespace Checkers.GameObjects
 {
     /// <summary>
     /// Определяет текущее состояние игрового процесса.

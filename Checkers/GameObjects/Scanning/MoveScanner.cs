@@ -1,6 +1,6 @@
-﻿using Сheckers.GameObjects.Rules;
+﻿using Checkers.GameObjects.Rules;
 
-namespace Сheckers.GameObjects.Scanning
+namespace Checkers.GameObjects.Scanning
 {
     /// <summary>
     /// Механизм поиска доступных ходов, производящий последовательное сканирование клеток/диагоналей/фигур.
