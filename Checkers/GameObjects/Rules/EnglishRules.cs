@@ -19,14 +19,17 @@ namespace Сheckers.GameObjects.Rules
         /// <inheritdoc />
         public IEnumerable<StartPosition> GetInitialPositions()
         {
-            // Стандартная расстановка 8x8 (3 ряда)
-            for (int r = 0; r < 8; r++)
-                for (int c = 0; c < 8; c++)
-                {
-                    if ((r + c) % 2 != 1) continue;
-                    if (r < 3) yield return new StartPosition(new Point(r, c), PieceSide.Black, PieceType.Man);
-                    if (r > 4) yield return new StartPosition(new Point(r, c), PieceSide.White, PieceType.Man);
-                }
+            // Традиционная расстановка: 3 ряда белых (снизу), 3 ряда черных (сверху)
+            // Внизу доски находятся первые ряды
+            var positions = new List<StartPosition>(24);
+
+            for (int row = 0; row < 3; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.White, PieceType.Man));
+            for (int row = 5; row < 8; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.Black, PieceType.Man));
+            return positions;
         }
 
         /// <inheritdoc />

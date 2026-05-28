@@ -26,16 +26,16 @@ namespace Сheckers.GameObjects.Rules
         /// <inheritdoc />
         public IEnumerable<StartPosition> GetInitialPositions()
         {
-            // Традиционная расстановка: 3 ряда черных (сверху), 3 ряда белых (снизу)
-            var positions = new List<StartPosition>();
-            for (int r = 0; r < 8; r++)
-            {
-                for (int c = (r % 2 == 0 ? 1 : 0); c < 8; c += 2)
-                {
-                    if (r < 3) positions.Add(new StartPosition(new Point(r, c), PieceSide.Black, PieceType.Man));
-                    if (r > 4) positions.Add(new StartPosition(new Point(r, c), PieceSide.White, PieceType.Man));
-                }
-            }
+            // Традиционная расстановка: 3 ряда белых (снизу), 3 ряда черных (сверху)
+            // Внизу доски находятся первые ряды
+            var positions = new List<StartPosition>(24);
+
+            for (int row = 0; row < 3; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.White, PieceType.Man));
+            for (int row = 5; row < 8; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.Black, PieceType.Man));
             return positions;
         }
 
