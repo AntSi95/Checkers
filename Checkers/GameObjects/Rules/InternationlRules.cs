@@ -25,14 +25,16 @@ namespace Checkers.GameObjects.Rules
             /// <inheritdoc />
             public IEnumerable<StartPosition> GetInitialPositions()
             {
-                // 4 ряда фигур на доске 10x10
-                for (int r = 0; r < 10; r++)
-                    for (int c = 0; c < 10; c++)
-                    {
-                        if ((r + c) % 2 != 1) continue;
-                        if (r < 4) yield return new StartPosition(new Point(r, c), PieceSide.Black, PieceType.Man);
-                        if (r > 5) yield return new StartPosition(new Point(r, c), PieceSide.White, PieceType.Man);
-                    }
+                // Традиционная расстановка: 4 ряда белых (снизу), 4 ряда черных (сверху)
+                // Внизу доски находятся первые ряды
+                var positions = new List<StartPosition>(40);
+                for (int row = 0; row < 4; row++)
+                    for (int col = (row % 2); col < 10; col += 2)
+                        positions.Add(new StartPosition(new Point(row, col), PieceSide.White, PieceType.Man));
+                for (int row = 6; row < 10; row++)
+                    for (int col = (row % 2); col < 10; col += 2)
+                        positions.Add(new StartPosition(new Point(row, col), PieceSide.Black, PieceType.Man));
+                return positions;
             }
 
             /// <inheritdoc />
