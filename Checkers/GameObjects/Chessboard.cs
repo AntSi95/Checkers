@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Сheckers.GameObjects
+namespace Checkers.GameObjects
 {
     // TODO: Архитектурная оптимизация доступа к доске (Alpha -> Beta):
     // 1. Инкапсуляция: Сделать Chessboard 'internal', чтобы скрыть физику доски от пользователя библиотеки.

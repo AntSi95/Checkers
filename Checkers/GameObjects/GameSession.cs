@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Сheckers.GameObjects.Rules;
-using Сheckers.GameObjects.Scanning;
+using Checkers.GameObjects.Rules;
+using Checkers.GameObjects.Scanning;
 
-namespace Сheckers.GameObjects
+namespace Checkers.GameObjects
 {
     /// <summary>
     /// Полный срез данных о текущем состоянии игровой сессии для UI или API.

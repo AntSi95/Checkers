@@ -1,4 +1,4 @@
-﻿namespace Сheckers.GameObjects
+﻿namespace Checkers.GameObjects
 {
     /// <summary>
     /// Информация о завершённом или текущем ходе игрока.

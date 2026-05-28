@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using Сheckers.GameObjects.Rules;
+using Checkers.GameObjects.Rules;
 
-namespace Сheckers.GameObjects.Scanning
+namespace Checkers.GameObjects.Scanning
 {
     /// <summary>
     /// Режим поиска доступных перемещений.

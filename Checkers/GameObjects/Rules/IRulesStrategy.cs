@@ -1,6 +1,6 @@
-﻿using Сheckers.GameObjects.Scanning;
+﻿using Checkers.GameObjects.Scanning;
 
-namespace Сheckers.GameObjects.Rules
+namespace Checkers.GameObjects.Rules
 {
     /// <summary>
     /// Определяет решение правил о дальнейшем развитии игрового процесса.
