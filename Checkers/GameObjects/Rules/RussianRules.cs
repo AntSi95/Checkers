@@ -1,6 +1,6 @@
-﻿using Сheckers.GameObjects.Scanning;
+﻿using Checkers.GameObjects.Scanning;
 
-namespace Сheckers.GameObjects.Rules
+namespace Checkers.GameObjects.Rules
 {
     /// <summary>
     /// Стратегия правил Русских шашек.
@@ -30,7 +30,7 @@ namespace Сheckers.GameObjects.Rules
             var positions = new List<StartPosition>();
             for (int r = 0; r < 8; r++)
             {
-                for (int c = (r % 2 == 0 ? 1 : 0); c < 8; c += 2)
+                for (int c = (r % 2); c < 8; c += 2)
                 {
                     if (r < 3) positions.Add(new StartPosition(new Point(r, c), PieceSide.Black, PieceType.Man));
                     if (r > 4) positions.Add(new StartPosition(new Point(r, c), PieceSide.White, PieceType.Man));

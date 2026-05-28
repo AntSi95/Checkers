@@ -1,4 +1,4 @@
-﻿namespace Сheckers.GameObjects
+﻿namespace Checkers.GameObjects
 {
     /// <summary>
     /// Предоставляет набор атомарных команд для изменения состояния доски.
