@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<AssemblyName>Checkers.Tests</AssemblyName>
+		<AssemblyName>Checkers.Engine.Tests</AssemblyName>
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -17,15 +17,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Checkers\Checkers.Engine.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Using Include="Xunit" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Extentions\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Checkers\Checkers.csproj" />
 	</ItemGroup>
 
 </Project>
