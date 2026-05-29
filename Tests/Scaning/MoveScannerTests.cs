@@ -1,9 +1,9 @@
-﻿using Xunit;
-using Checkers.GameObjects;
-using Checkers.GameObjects.Scanning;
-using Checkers.GameObjects.Rules;
+﻿using Checkers.Engine.Core;
+using Checkers.Engine.Models;
+using Checkers.Engine.Rules.Variants;
+using Checkers.Engine.Scanning;
 
-namespace Checkers.Tests.Scanning
+namespace Checkers.Engine.Tests.Scaning
 {
     public class MoveScannerTests
     {

@@ -1,6 +1,8 @@
-﻿using Checkers.GameObjects.Rules;
+﻿using Checkers.Engine.Core;
+using Checkers.Engine.Models;
+using Checkers.Engine.Rules;
 
-namespace Checkers.GameObjects.Scanning
+namespace Checkers.Engine.Scanning
 {
     /// <summary>
     /// Механизм поиска доступных ходов, производящий последовательное сканирование клеток/диагоналей/фигур.

@@ -1,8 +1,8 @@
-﻿using Checkers.GameObjects;
-using Checkers.GameObjects.Rules;
-using Checkers.GameObjects.Scanning;
+﻿using Checkers.Engine.Models;
+using Checkers.Engine.Rules.Variants;
+using Checkers.Engine.Scanning;
 
-namespace Checkers.Tests.Scanning
+namespace Checkers.Engine.Tests.Scaning
 {
     public class EnglishRulesTests
     {

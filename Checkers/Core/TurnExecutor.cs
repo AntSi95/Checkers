@@ -1,4 +1,6 @@
-﻿namespace Checkers.GameObjects
+﻿using Checkers.Engine.Models;
+
+namespace Checkers.Engine.Core
 {
     /// <summary>
     /// Предоставляет набор атомарных команд для изменения состояния доски.

@@ -1,6 +1,8 @@
-﻿using Checkers.GameObjects.Scanning;
+﻿using Checkers.Engine.Core;
+using Checkers.Engine.Models;
+using Checkers.Engine.Scanning;
 
-namespace Checkers.GameObjects.Rules
+namespace Checkers.Engine.Rules.Variants
 {
     /// <summary>
     /// Стратегия правил Русских шашек.
