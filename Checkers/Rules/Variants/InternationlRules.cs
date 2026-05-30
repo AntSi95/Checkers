@@ -101,6 +101,7 @@ namespace Checkers.Engine.Rules.Variants
         /// <inheritdoc />
         public GameResult JudgeTerminalState(IBoardInspection board, PieceSide side)
         {
+            //TODO: доработать как метод так и GameResult. Сейчас делает слишком мало за слишком большие реурсы.
             var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
             bool hasPieces = board.GetValidSquares().Any(s => { board.TryGetPiece(s, out var p); return p?.Side == side; });
 

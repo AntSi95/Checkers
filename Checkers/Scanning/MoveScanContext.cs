@@ -76,10 +76,6 @@ namespace Checkers.Engine.Scanning
         /// </summary>
         public void PrepareScanningRay(RayDirection ray)
         {
-            //избыточно так как все вызовы контролируют правильность ввода
-            //if (ray == RayDirection.None)
-            //    throw new ArgumentException("Необходимо указать конкретный луч.");
-
             ResetRay();
 
             CurrentRay = ray;

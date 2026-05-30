@@ -2,6 +2,7 @@
 
 namespace Checkers.Engine.Rules
 {
+    // TODO: небольшая оптимизация перивести enum к типу byte (по дефолту это int)
     /// <summary>
     /// Определяет решение правил о дальнейшем развитии игрового процесса.
     /// </summary>
@@ -32,6 +33,7 @@ namespace Checkers.Engine.Rules
     /// </summary>
     public record StartPosition(Point Square, PieceSide Side, PieceType Type = PieceType.Man);
 
+    //TODO: подумать о том как его либо убрать, либо расширить, вместе c методами использующим эту запись.
     /// <summary>
     /// Технический вердикт о результате завершённой партии.
     /// </summary>

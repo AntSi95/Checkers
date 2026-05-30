@@ -224,6 +224,7 @@ namespace Checkers.Engine
             // Сбрасываем устаревший кэш
             _cachedMoves = null;
 
+            // TODO: проверить логику с nextSide. В методох правил этот параметр может снова инвертироваться.
             var nextSide = _currentTurn.Side == PieceSide.White ? PieceSide.Black : PieceSide.White;
 
             _currentTurn = new Turn(nextSide);

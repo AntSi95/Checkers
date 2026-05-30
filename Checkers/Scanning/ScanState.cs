@@ -1,5 +1,6 @@
 ﻿namespace Checkers.Engine.Scanning
 {
+    // TODO: небольшая оптимизация перивести enum к типу byte (по дефолту это int)
     /// <summary>
     /// Режим поиска доступных перемещений.
     /// </summary>
