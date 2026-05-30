@@ -9,18 +9,37 @@
 Движок спроектирован по принципу слабой связанности компонентов. Центральным оркестратором (фасадом), с которым взаимодействуют внешние слои, является класс `GameSession`. Внутренняя логика разделена на изолированные зоны ответственности:
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1f1f1f', 'edgeLabelBackground':'#111' }}}%%
 graph TD
-    User([Внешний слой: Web API / UI]) -->|Вызовы API| Session[GameSession]
+    User([Внешний слой: Web API / UI / Tests]) -->|Использует| Session[GameSession]
     
-    Session -->|Запрос доступных ходов| Scanner[MoveScanner]
-    Scanner -->|Запрашивает оценку текущей клетки| Rules{IRulesStrategy}
-    Scanner -->|Передает данные на хранение и компоновку| Context[MoveScanContext]
+    %% Блок сканирования
+    Session -->|Запрос ходов| Scanner[IMoveScanner / MoveScanner]
+    Scanner -->|Контекст конечного автомата| Context[MoveScanContext]
+    Scanner -->|Запрашивает оценку клеток| Rules[IRulesStrategy / Variants]
+    Context -.->|Читает состояние через| Navigation(IBoardNavigation)
     
-    Session -->|Запрашивает сценарий выполнения хода| Rules
+    %% Блок правил и оркестрации
+    Session -->|Запрашивает судейство хода| Rules
+    Rules -.->|Судит состояние через| Inspection(IBoardInspection)
+    Rules -.->|Мутирует доску через| Execution(ITurnExecution)
     
-    Rules -->|Использует для мутации доски| Executor[TurnExecutor]
-    Executor -->|Применяет действия| Board[(Chessboard)]
-    Board -->|Изменяет состояние| Piece[Piece]
+    %% Инкапсулированное ядро (internal)
+    subgraph Core
+        Navigation --- Board[(Chessboard: internal sealed)]
+        Inspection --- Board
+        Execution --- Board
+        Board -->|Физически изменяет| Piece[Piece / Models]
+    end
+
+    %% Новые приглушенные цвета для темной темы
+    style Core fill:#1a1a1a,stroke:#444,stroke-width:1px,stroke-dasharray: 5 5
+    style Navigation fill:#0d2535,stroke:#0288d1,stroke-width:1px
+    style Inspection fill:#0d2535,stroke:#0288d1,stroke-width:1px
+    style Execution fill:#2d1f18,stroke:#5d4037,stroke-width:1px
+    style Board fill:#2a1b0a,stroke:#f57c00,stroke-width:2px
+
+
 ```
 
 ---
@@ -36,6 +55,8 @@ graph TD
 
 *   Если `useEvenSquares = true`, то `_party = 0` (игровыми являются клетки с четной суммой координат, например `(0,0)`, `(1,1)`).
 *   Если `useEvenSquares = false`, то `_party = 1`.
+
+Используется шахматное понятие матрицы. То есть нижний левый угол является началом координат. [0,0] соответствует A1.
 
 Попытка установить или переместить фигуру на клетку, не прошедшую этот фильтр, вызывает `ArgumentException`, защищая ядро от некорректных состояний.
 

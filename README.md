@@ -27,15 +27,15 @@
 
 ### Инициализация игровой сессии
 ```csharp
-using checkers.Core;
-using checkers.Core.Rules;
-using checkers.GameObjects.Scanning;
+using Checkers.Engine;
+using Checkers.Engine.Rules.Variants;
+using Checkers.Engine.Scanning;
 
-// 1. Выбираем стратегию правил и сканер
+// 1. Выбираем стратегию правил и сканер ходов
 var rules = new RussianRules();
 var scanner = new MoveScanner();
 
-// 2. Запускаем сессию управления игрой
+// 2. Запускаем сессию управления игрой (все интерфейсы доски скрыты внутри)
 var session = new GameSession(rules, scanner);
 ```
 
@@ -55,12 +55,13 @@ if (validMoves.Contains(chosenMove))
 
 ### Сохранение и восстановление партии
 ```csharp
-// Получение сериализуемого снимка истории ходов
+// Получение сериализуемого снимка истории ходов (модели изолированы от логики сессии)
 GameSnapshot snapshot = session.GetSnapshot();
 
 // Полное восстановление игрового процесса из истории ходов (автоматически определит активного игрока)
 GameSession restoredSession = GameSession.Restore(snapshot.History, rules, scanner);
 ```
+
 
 ---
 ## 📚 Техническая документация проекта
@@ -82,8 +83,6 @@ GameSession restoredSession = GameSession.Restore(snapshot.History, rules, scann
 В следующих версиях планируется:
 *   **Инверсия управления доской (Фабрика правил):** Полностью отвязать `GameSession` от создания физического поля. Перенести ответственность за порождение инстанса `Chessboard` из конструктора сессии напрямую в фабричные методы `IRulesStrategy`. Это позволит изолировать доску как самостоятельный элемент и передавать в движок кастомные сетки (например, цилиндрические или гексагональные доски) без изменения логики сессии.
 *   **Глубокий анализ истории и Приоритет большинства:** В текущей версии движка отсутствует алгоритм построения полного дерева ходов (глубинный анализ). По этой причине специфическое правило международных шашек на **Приоритет большинства** (обязанность выбирать траекторию с максимальным количеством срубленных фигур) временно не реализовано.
-*   **Рефакторинг доступа к доске:** перевод `Chessboard` в `internal` и выделение read-only интерфейса `IBoardInspector` для судейских методов правил.
-*   **Унификация мутаций:** перенос методов `TurnExecutor` напрямую в контекст управления доской.
 
 ---
 
@@ -101,10 +100,9 @@ GameSession restoredSession = GameSession.Restore(snapshot.History, rules, scann
 │       ├── RUSSIAN.md            # Спецификация русских шашек + код
 │       ├── ENGLISH.md            # Спецификация английского чекерса + код
 │       └── INTERNATIONAL.md      # Спецификация международных шашек + код
-├── src/
-│   └── checkers/         # Проект игрового движка (Class Library)
-│       └── checkers.csproj
-└── tests/
-    └── checkers.Tests/   # Проект модульных тестов (xUnit)
-        └── checkers.Tests.csproj
+├── Checkers/         # Проект игрового движка (Class Library)
+│       └── Checkers.Engine.csproj
+└── Tests/
+    └── Checkers.Tests/   # Проект модульных тестов (xUnit)
+        └── Checkers.Engine.Tests.csproj
 ```

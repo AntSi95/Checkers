@@ -16,148 +16,105 @@
 Ниже представлен чистый код класса правил, полностью интегрированный со сканером и сессией движка:
 
 ```csharp
-using checkers.GameObjects;
-using checkers.GameObjects.Rules;
-using checkers.GameObjects.Scanning;
+using Checkers.Engine.Models;
+using Checkers.Engine.Scanning;
 
-namespace checkers.Core.Rules;
-
-public class EnglishRules : IRulesStrategy
-{
-    #region Методы создания игрового поля
-
-    // Настройка доски: 8 рядов, 8 столбцов, играем на темных (четных) клетках
-    public BoardSettings GetSettings() => new BoardSettings(8, 8, UseEvenSquares: true);
-
-    // Выполняем стартовую расстановку шашек на доске
-    public IEnumerable<StartPosition> GetInitialPositions()
+namespace Checkers.Engine.Rules.Variants
+    public class EnglishRules : IRulesStrategy
     {
-        // Стандартная расстановка 8x8 (по 3 ряда с каждой стороны)
-        for (int r = 0; r < 8; r++)
-            for (int c = 0; c < 8; c++)
-            {
-                // Фильтруем только темные игровые клетки
-                if ((r + c) % 2 != 1) continue;
-                
-                // Верхние три ряда (0, 1, 2) заполняем черными шашками
-                if (r < 3) yield return new StartPosition(new Point(r, c), PieceSide.Black, PieceType.Man);
-                
-                // Нижние три ряда (5, 6, 7) заполняем белыми шашками
-                if (r > 4) yield return new StartPosition(new Point(r, c), PieceSide.White, PieceType.Man);
-            }
-    }
+        // Настройка доски: 8 рядов, 8 столбцов, играем на темных (четных) клетках
+        public BoardSettings GetSettings() => new(8, 8, UseEvenSquares: true);
 
-    #endregion
-
-    #region Методы сканирования
-
-    // Проверяет, доступна ли фигура для взятия
-    public bool IsEnemy(Piece actor, Piece target)
-    {
-        // Фигура должна принадлежать оппоненту. 
-        // Нельзя бить одну фигуру дважды за серию (у нее IsCaptured == true)
-        return actor.Side != target.Side && !target.IsCaptured;
-    }
-
-    // Главный судейский метод: оценивает клетку на векторе диагонального луча
-    public ScanVerdict EvaluateMove(Piece actor, RayDirection ray, ScanState state, int distance, bool isOccupied)
-    {
-        // 1. Главный фильтр Чекерса: простая шашка (Man) абсолютно слепа к векторам за спиной
-        if (actor.Type == PieceType.Man && !ray.IsForwardFor(actor.Side))
+        public IEnumerable<StartPosition> GetInitialPositions()
         {
-            return new ScanVerdict(IsPossible: false, CanContinue: false);
+            // Традиционная расстановка: 3 ряда белых (снизу), 3 ряда черных (сверху)
+            // Внизу доски находятся первые ряды
+            var positions = new List<StartPosition>(24);
+
+            for (int row = 0; row < 3; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.White, PieceType.Man));
+            for (int row = 5; row < 8; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.Black, PieceType.Man));
+            return positions;
         }
 
-        // 2. Универсальная логика короткоходной фигуры: после фильтра выше 
-        // поведение пешки и дамки на луче становится математически идентичным
-        return state switch
+        // Проверяет, доступна ли фигура для взятия
+        public bool IsEnemy(Piece actor, Piece target) => actor.Side != target.Side && !target.IsCaptured;
+
+        // Главный судейский метод: оценивает клетку на векторе диагонального луча
+        public ScanVerdict EvaluateMove(Piece actor, RayDirection ray, ScanState state, int distance, bool isOccupied)
         {
-            // Фаза Default: Обычный поиск тихих ходов и потенциального боя.
-            // - Тихий ход: строго 1 клетка удаления от фигуры и она должна быть пустой.
-            // - Если клетка на расстоянии 1 занята (isOccupied): разрешаем сканеру продолжить, 
-            //   чтобы система вызвала IsEnemy и зафиксировала цель.
-            ScanState.Default => new ScanVerdict(
-                IsPossible: distance == 1 && !isOccupied,
-                CanContinue: distance == 1 && isOccupied
-            ),
-
-            // Фаза ForcedCaptureOnly: В сессии есть обязательный бой.
-            // Пустые клетки игнорируются, но скользим до дистанции 1, если там стоит фигура.
-            ScanState.ForcedCaptureOnly => new ScanVerdict(
-                IsPossible: false,
-                CanContinue: distance == 1 && isOccupied
-            ),
-
-            // Фаза TargetDetected: На предыдущем шаге (дистанция 1) был обнаружен враг.
-            // Точка приземления для короткоходной фигуры обязана быть на расстоянии строго 2 клетки и быть пустой.
-            // Дальше сканировать этот луч бессмысленно (CanContinue: false).
-            ScanState.TargetDetected => new ScanVerdict(
-                IsPossible: distance == 2 && !isOccupied,
-                CanContinue: false
-            ),
-
-            _ => new ScanVerdict(IsPossible: false, CanContinue: false)
-        };
-    }
-
-    #endregion
-
-    #region Методы реализации хода
-
-    // Управляет физическим применением шага на доске
-    public bool ProcessStep(ITurnActions actions, Move move)
-    {
-        // Выполняем физический сдвиг фигуры
-        actions.ApplyMove(move);
-
-        // Сценарий А: Выполнен прыжок с рубочной целью
-        if (move.IsCapture)
-        {
-            // Вешаем на срубленную фигуру маркер отложенного удаления
-            actions.ApplyCaptureMark(move.Target!.Value);
-
-            // Специфика Чекерса: если шашка в результате прыжка достигла края доски,
-            // мы вешаем отложенный флаг коронации (ApplyPromotionMark), но ОБЯЗАТЕЛЬНО
-            // возвращаем false. Ход принудительно завершается, серия прыжков прерывается.
-            if (actions.CanPromote(move.To))
+            // 1. Главный фильтр Чекерса: простая шашка не видит ничего за спиной.
+            if (actor.Type == PieceType.Man && !ray.IsForwardFor(actor.Side))
             {
-                actions.ApplyPromotionMark(move.To);
-                return false; 
+                return new ScanVerdict(false, false);
             }
-            return true; // Был бой не на краю, серия прыжков может продолжиться
+
+            // 2. Универсальная логика короткоходной фигуры (и Man, и King одинаковы)
+            return state switch
+            {
+                // Тихий ход: строго на 1 клетку.
+                ScanState.Default => new ScanVerdict(
+                    IsPossible: distance == 1 && !isOccupied,
+                    CanContinue: distance == 1 && isOccupied // Даем шанс на бой
+                ),
+
+                // Поиск боя: скользим до дистанции 1, если там препятствие.
+                ScanState.ForcedCaptureOnly => new ScanVerdict(
+                    IsPossible: false,
+                    CanContinue: distance == 1 && isOccupied
+                ),
+
+                // Приземление: строго на дистанции 2 за врагом.
+                ScanState.TargetDetected => new ScanVerdict(
+                    IsPossible: distance == 2 && !isOccupied,
+                    CanContinue: false
+                ),
+
+                _ => new ScanVerdict(false, false)
+            };
         }
 
-        // Сценарий Б: Выполнен обычный тихий ход.
-        // Если дошли до дамочного поля в конце пути — вешаем маркер коронации.
-        if (actions.CanPromote(move.To)) 
-            actions.ApplyPromotionMark(move.To);
-            
-        return false; // Тихий ход — серия невозможна
+        // Управляет физическим применением шага на доске
+        public bool ProcessStep(ITurnExecution actions, Move move)
+        {
+            actions.ApplyMove(move);
+
+            if (move.IsCapture)
+            {
+                actions.ApplyCaptureMark(move.Target!.Value);
+
+                // Если шашка достигла края — помечаем, но НЕ превращаем сразу.
+                // В Чекерсе ход дамкой на краю СРАЗУ завершается.
+                if (actions.CanPromote(move.To))
+                {
+                    actions.ApplyPromotionMark(move.To);
+                    return false; // Специфика: серия прерывается при достижении края
+                }
+                return true;
+            }
+
+            if (actions.CanPromote(move.To)) actions.ApplyPromotionMark(move.To);
+            return false;
+        }
+
+        // Вызывается один раз в конце хода, когда действия игрока зафиксированы как финальные
+        public void OnFinalize(ITurnExecution actions, Point lastPostion) => actions.ApplyFinalEffects();
+
+        // Решает, что делать при полном запирании ходов у текущей стороны
+        public TurnResult HandleNoMoves(IBoardInspection board, PieceSide side) => TurnResult.GameFinished;
+
+        // Выносит окончательный технический вердикт о результатах партии
+        public GameResult JudgeTerminalState(IBoardInspection board, PieceSide side)
+        {
+            //TODO: доработать как метод так и GameResult. Сейчас делает слишком мало за слишком большие реурсы.
+            var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
+            bool hasPieces = board.GetValidSquares().Any(s => { board.TryGetPiece(s, out var p); return p?.Side == side; });
+
+            return new GameResult(winner, hasPieces ? GameEndReason.NoAvailableMoves : GameEndReason.AllPiecesCaptured);
+        }
     }
-
-    // Вызывается один раз, когда действия игрока зафиксированы как финальные
-    public void OnFinalize(ITurnActions actions, Point lastPosition)
-    {
-        // Запускаем отложенный конвейер изменений: материализуем дамки 
-        // и физически удаляем все помеченные сбитые фигуры с доски.
-        actions.ApplyFinalEffects();
-    }
-
-    #endregion
-
-    #region Методы глобальных игровых правил
-
-    // Решает, что делать при полном запирании ходов у текущей стороны
-    public TurnResult HandleNoMoves(PieceSide side, Chessboard board) => TurnResult.GameFinished;
-
-    // Выносит окончательный технический вердикт о результатах партии
-    public GameResult JudgeTerminalState(PieceSide side, Chessboard board)
-    {
-        // В рамках текущей альфа-версии Чекерса заблокированный игрок признается проигравшим
-        var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
-        return new GameResult(winner, GameEndReason.NoAvailableMoves);
-    }
-
-    #endregion
 }
 ```
