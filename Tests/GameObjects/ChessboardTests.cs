@@ -1,7 +1,7 @@
-﻿using Xunit;
-using Checkers.GameObjects;
+﻿using Checkers.Engine.Core;
+using Checkers.Engine.Models;
 
-namespace Checkers.Tests.GameObjects
+namespace Checkers.Engine.Tests.GameObjects
 {
     public class ChessboardTests
     {

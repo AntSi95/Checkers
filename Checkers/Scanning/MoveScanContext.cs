@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
-using Checkers.GameObjects.Rules;
+using Checkers.Engine.Core;
+using Checkers.Engine.Models;
+using Checkers.Engine.Rules;
 
-namespace Checkers.GameObjects.Scanning
+namespace Checkers.Engine.Scanning
 {
     /// <summary>
     /// Режим поиска доступных перемещений.
@@ -205,10 +207,14 @@ namespace Checkers.GameObjects.Scanning
             State = IsCaptureMode ? ScanState.ForcedCaptureOnly : ScanState.Default;
         }
 
+        // TODO [Optimization]: Активировать и интегрировать этот метод при переходе к глубокому сканированию, при необходимости
         ///// <summary>
         ///// Полностью очищает контекст и готовит его к новой независимой сессии поиска ходов.
         ///// </summary>
-        ///// <remarks> Не забываем вызываеть его после конструктора</remarks>
+        ///// <remarks>
+        ///// Позволяет повторно использовать существующий экземпляр контекста для другой фигуры,
+        ///// минимизируя нагрузку на сборщик мусора (GC) в глубоких циклах поиска.
+        ///// </remarks>
         //public void RestartScanning(Point startSquare, ScanMode mode)
         //{
         //    FoundMoves.Clear();

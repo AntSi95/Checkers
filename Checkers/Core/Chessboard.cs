@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
+using Checkers.Engine.Models;
 
-namespace Checkers.GameObjects
+namespace Checkers.Engine.Core
 {
     // TODO: Архитектурная оптимизация доступа к доске (Alpha -> Beta):
     // 1. Инкапсуляция: Сделать Chessboard 'internal', чтобы скрыть физику доски от пользователя библиотеки.

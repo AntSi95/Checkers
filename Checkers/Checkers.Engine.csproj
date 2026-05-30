@@ -26,7 +26,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="Checkers.Tests" />
+		<InternalsVisibleTo Include="Checkers.Engine.Tests" />
 	</ItemGroup>
 
 </Project>

@@ -1,13 +1,13 @@
-﻿using Checkers.GameObjects.Rules;
-using Checkers.GameObjects;
-using Checkers.GameObjects.Scanning;
+﻿using Checkers.Engine.Models;
+using Checkers.Engine.Rules.Variants;
+using Checkers.Engine.Scanning;
 
-namespace Checkers.Tests.Scanning
+namespace Checkers.Engine.Tests.Scaning
 {
     public class RussianRulesTests
     {
         // Не забудь, что теперь RussianRules требует Scanner в конструкторе (если ты не отвязал его окончательно)
-        private readonly RussianRules _rules = new RussianRules();
+        private readonly RussianRules _rules = new();
         private readonly Piece _whiteMan = new(PieceSide.White, PieceType.Man);
 
         [Theory]

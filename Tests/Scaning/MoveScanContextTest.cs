@@ -1,9 +1,10 @@
 ﻿using Moq;
-using Checkers.GameObjects.Scanning;
-using Checkers.GameObjects;
-using Checkers.GameObjects.Rules;
+using Checkers.Engine.Core;
+using Checkers.Engine.Models;
+using Checkers.Engine.Rules;
+using Checkers.Engine.Scanning;
 
-namespace Checkers.Tests.Scanning
+namespace Checkers.Engine.Tests.Scaning
 {
     public class MoveScanContextTests
     {
@@ -45,7 +46,7 @@ namespace Checkers.Tests.Scanning
         public void TryStepForward_ReturnsFalse_AtBoardEdge()
         {
             // Arrange
-            Point edge = new Point(0, 0);
+            var edge = new Point(0, 0);
             _board.PlacePiece(edge, _whiteMan);
 
             var ctx = new MoveScanContext(_board, _rulesMock.Object, ScanMode.All);

@@ -1,4 +1,4 @@
-﻿namespace Checkers.GameObjects
+﻿namespace Checkers.Engine.Models
 {
 
     /// <summary>

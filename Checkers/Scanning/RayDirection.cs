@@ -1,4 +1,6 @@
-﻿namespace Checkers.GameObjects.Scanning
+﻿using Checkers.Engine.Models;
+
+namespace Checkers.Engine.Scanning
 {
     /// <summary>
     /// Определяет четыре диагональных направления движения по игровой доске.
