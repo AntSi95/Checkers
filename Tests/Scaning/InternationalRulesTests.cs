@@ -39,7 +39,6 @@ namespace Checkers.Engine.Tests.Scaning
             // Arrange
             // Нам нужен настоящий Executor или его Mock, так как метод CanPromote полезет в доску
             var board = new Chessboard(10, 10);
-            var executor = new TurnExecutor(board);
 
             // Ставим белую шашку на пред-дамочную линию
             var start = new Point(2, 2);
@@ -54,7 +53,7 @@ namespace Checkers.Engine.Tests.Scaning
             // Act
             // В международных шашках ProcessStep возвращает true, если был бой.
             // Но он НЕ должен менять тип фигуры на King немедленно.
-            bool canContinue = _rules.ProcessStep(executor, move);
+            bool canContinue = _rules.ProcessStep(board, move);
 
             // Assert
             Assert.True(canContinue);
@@ -79,7 +78,6 @@ namespace Checkers.Engine.Tests.Scaning
         {
             // Arrange
             var board = new Chessboard(10, 10);
-            var executor = new TurnExecutor(board);
             var endPoint = new Point(0, 4); // Край поля для белых
 
             // Ставим белую шашку на край
@@ -87,7 +85,7 @@ namespace Checkers.Engine.Tests.Scaning
 
             // Act
             // Вызываем финализацию, передавая точку, где "замерла" фигура
-            _rules.OnFinalize(executor, endPoint);
+            _rules.OnFinalize(board, endPoint);
 
             // Assert
             // Теперь, после финализации, она должна стать дамкой

@@ -1,12 +1,12 @@
 ﻿using Checkers.Engine.Models;
 
-namespace Checkers.Engine.Core
+namespace Checkers.Engine
 {
     /// <summary>
     /// Предоставляет набор атомарных команд для изменения состояния доски.
     /// Используется правилами (Rules) для выполнения этапов хода.
     /// </summary>
-    public interface ITurnActions
+    public interface ITurnExecution
     {
         /// <summary> Выполняет физическое перемещение фигуры. </summary>
         void ApplyMove(Move move);
@@ -36,35 +36,5 @@ namespace Checkers.Engine.Core
          * void ApplyEnd();            - Для явной финализации статуса в Turn
          * bool CanCaptureMore();      - Если Executor будет делегировать проверку серии Scanner-у
          */
-    }
-
-    /// <summary>
-    /// Исполнитель команд, транслирующий действия правил в изменения на доске.
-    /// </summary>
-    internal class TurnExecutor : ITurnActions
-    {
-        private readonly Chessboard _board;
-
-        public TurnExecutor(Chessboard board) => _board = board;
-
-        public void ApplyMove(Move move) => _board.Execute(move);
-
-        public void ApplyCaptureMark(Point target) => _board.MarkAsCaptured(target);
-
-        public void ApplyPromotion(Point target) => _board.Transform(target);
-
-        public void ApplyPromotionMark(Point target) => _board.MarkAsPromoted(target);
-
-        public void ApplyRemoval() => _board.RemoveCapturedPieces();
-
-        public void ApplyRemoval(Point target) => _board.Remove(target);
-
-        public void ApplyFinalEffects() => _board.SettleTurn();
-
-        public bool CanPromote(Point square)
-        {
-            _board.TryGetPiece(square,out var piece);
-            return piece is not null && _board.IsPromotionEdge(square, piece.Side);
-        }
     }
 }

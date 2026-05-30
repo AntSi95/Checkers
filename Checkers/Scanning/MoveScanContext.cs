@@ -1,43 +1,9 @@
 ﻿using System.Diagnostics;
-using Checkers.Engine.Core;
 using Checkers.Engine.Models;
 using Checkers.Engine.Rules;
 
 namespace Checkers.Engine.Scanning
 {
-    /// <summary>
-    /// Режим поиска доступных перемещений.
-    /// </summary>
-    public enum ScanMode
-    {
-        /// <summary> Искать все типы ходов (тихие и взятия). </summary>
-        All,
-
-        /// <summary> Искать исключительно ходы с захватом фигур. </summary>
-        CapturesOnly
-    }
-
-    /// <summary>
-    /// Состояния конечного автомата при сканировании луча диагонали.
-    /// </summary>
-    public enum ScanState
-    {
-        /// <summary> Исходное состояние. Допускаются тихие ходы. </summary>
-        Default,
-
-        /// <summary> Режим принудительного поиска захвата. Тихие ходы игнорируются. </summary>
-        ForcedCaptureOnly,
-
-        /// <summary> На луче обнаружена фигура противника (потенциальная цель). </summary>
-        TargetDetected,
-
-        /// <summary> Зафиксирован факт перепрыгивания через цель (взятие возможно). </summary>
-        CaptureMoveFound,
-
-        /// <summary> Сканирование луча завершено (препятствие, край доски или предел дальности). </summary>
-        Terminated
-    }
-
     /// <summary>
     /// Контекст состояния процесса сканирования ходов.
     /// </summary>
@@ -48,9 +14,9 @@ namespace Checkers.Engine.Scanning
     /// 2. Автомат состояний сканирования (обнаружение целей, подтверждение приземлений).
     /// 3. Агрегация результатов (фильтрация и накопление списка валидных перемещений).
     /// </remarks>
-    internal class MoveScanContext
+    internal sealed class MoveScanContext
     {
-        public Chessboard Board { get; }
+        public IBoardNavigation Board { get; }
         public IRulesStrategy Rules { get; }
         /// <summary>
         /// Список найденных ходов, накапливает в себе ходы при каждой смене проверяемого направления или фигуры
@@ -79,7 +45,7 @@ namespace Checkers.Engine.Scanning
         private Point _step;
 
 
-        public MoveScanContext(Chessboard board, IRulesStrategy rules, ScanMode mode)
+        public MoveScanContext(IBoardNavigation board, IRulesStrategy rules, ScanMode mode)
         {
             Board = board;
             Rules = rules;
@@ -110,10 +76,6 @@ namespace Checkers.Engine.Scanning
         /// </summary>
         public void PrepareScanningRay(RayDirection ray)
         {
-            //избыточно так как все вызовы контролируют правильность ввода
-            //if (ray == RayDirection.None)
-            //    throw new ArgumentException("Необходимо указать конкретный луч.");
-
             ResetRay();
 
             CurrentRay = ray;

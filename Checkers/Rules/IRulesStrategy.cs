@@ -1,46 +1,8 @@
-﻿using Checkers.Engine.Core;
-using Checkers.Engine.Models;
+﻿using Checkers.Engine.Models;
 using Checkers.Engine.Scanning;
 
 namespace Checkers.Engine.Rules
 {
-    /// <summary>
-    /// Определяет решение правил о дальнейшем развитии игрового процесса.
-    /// </summary>
-    public enum TurnResult
-    {
-        /// <summary> Можно продолжать текущий ход (серия). </summary>
-        Continue,
-        /// <summary> Ход переходит к другому игроку. </summary>
-        SwitchSide,
-        /// <summary> Игра окончена (победа/поражение/ничья). </summary>
-        GameFinished
-    }
-
-    /// <summary>
-    /// Вердикт правил относительно конкретной клетки на пути сканирования.
-    /// </summary>
-    /// <param name="IsPossible">Можно ли физически завершить движение в этой клетке.</param>
-    /// <param name="CanContinue">Стоит ли сканеру смотреть следующие клетки на этом луче.</param>
-    public record struct ScanVerdict(bool IsPossible, bool CanContinue);
-
-    /// <summary>
-    /// Настройки геометрии и начального состояния игры.
-    /// </summary>
-    public record BoardSettings(int Rows, int Cols, bool UseEvenSquares = true);
-
-    /// <summary>
-    /// Описание начальной позиции конкретной фигуры.
-    /// </summary>
-    public record StartPosition(Point Square, PieceSide Side, PieceType Type = PieceType.Man);
-
-    /// <summary>
-    /// Технический вердикт о результате завершённой партии.
-    /// </summary>
-    /// <param name="Status">Итоговое состояние (победа одной из сторон или ничья).</param>
-    /// <param name="Reason">Логическое обоснование финала, определённое правилами.</param>
-    public record GameResult(GameStatus Status, GameEndReason Reason);
-
     /// <summary>
     /// Стратегия правил игры, определяющая логику движения, захвата и финализации хода.
     /// </summary>
@@ -105,23 +67,25 @@ namespace Checkers.Engine.Rules
         /// True — дальнейшее сканирование возможно (например если правила позволяют соверша серию взятий). 
         /// False — дальнейшее сканирование не требуется (например если совершен тихий ход).
         /// </returns>
-        bool ProcessStep(ITurnActions actions, Move move);
+        bool ProcessStep(ITurnExecution actions, Move move);
 
         /// <summary>
         /// Выполняет финальные действия в конце всего хода (массовое снятие фигур, отложенные дамки).
         /// </summary>
-        void OnFinalize(ITurnActions actions, Point lastPostion);
+        void OnFinalize(ITurnExecution actions, Point lastPostion);
 
         /// <summary>
         /// Решает, что делать, если у текущего игрока нет доступных ходов.
         /// </summary>
-        /// <param name="side">Сторона, у которой нет ходов.</param>
         /// <param name="board">Текущее состояние доски.</param>
-        TurnResult HandleNoMoves(PieceSide side, Chessboard board);
+        /// <param name="side">Сторона, у которой нет ходов.</param>
+        TurnResult HandleNoMoves(IBoardInspection board, PieceSide side);
 
         /// <summary>
         /// Выносит окончательный технический вердикт о результате игры.
         /// </summary>
-        GameResult JudgeTerminalState(PieceSide side, Chessboard board);
+        /// <param name="board">Текущее состояние доски.</param>
+        /// <param name="side">Сторона, на которой закончена игра.</param>
+        GameResult JudgeTerminalState(IBoardInspection board, PieceSide side);
     }
 }

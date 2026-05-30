@@ -1,5 +1,4 @@
-﻿using Checkers.Engine.Core;
-using Checkers.Engine.Models;
+﻿using Checkers.Engine.Models;
 using Checkers.Engine.Scanning;
 
 namespace Checkers.Engine.Rules.Variants
@@ -119,7 +118,7 @@ namespace Checkers.Engine.Rules.Variants
         #region методы реализации хода
 
         /// <inheritdoc />
-        public bool ProcessStep(ITurnActions actions, Move move)
+        public bool ProcessStep(ITurnExecution actions, Move move)
         {
             actions.ApplyMove(move);
 
@@ -142,20 +141,21 @@ namespace Checkers.Engine.Rules.Variants
         }
 
         /// <inheritdoc />
-        public void OnFinalize(ITurnActions actions, Point lastPostion) => actions.ApplyFinalEffects();
+        public void OnFinalize(ITurnExecution actions, Point lastPostion) => actions.ApplyFinalEffects();
 
         #endregion
 
         #region методы глобальных игровых правил
 
         /// <inheritdoc />
-        public TurnResult HandleNoMoves(PieceSide side, Chessboard board) => TurnResult.GameFinished;
+        public TurnResult HandleNoMoves(IBoardInspection board, PieceSide side) => TurnResult.GameFinished;
 
         /// <inheritdoc />
-        public GameResult JudgeTerminalState(PieceSide side, Chessboard board)
+        public GameResult JudgeTerminalState(IBoardInspection board, PieceSide side)
         {
+            //TODO: доработать как метод так и GameResult. Сейчас делает слишком мало за слишком большие реурсы.
             var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
-            bool hasPieces = board.GetValidSquares().Any(p => board[p]?.Side == side);
+            bool hasPieces = board.GetValidSquares().Any(s => { board.TryGetPiece(s, out var p); return p?.Side == side; });
 
             return new GameResult(winner, hasPieces ? GameEndReason.NoAvailableMoves : GameEndReason.AllPiecesCaptured);
         }

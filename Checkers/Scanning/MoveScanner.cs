@@ -1,5 +1,4 @@
-﻿using Checkers.Engine.Core;
-using Checkers.Engine.Models;
+﻿using Checkers.Engine.Models;
 using Checkers.Engine.Rules;
 
 namespace Checkers.Engine.Scanning
@@ -7,12 +6,12 @@ namespace Checkers.Engine.Scanning
     /// <summary>
     /// Механизм поиска доступных ходов, производящий последовательное сканирование клеток/диагоналей/фигур.
     /// </summary>
-    public class MoveScanner
+    public sealed class MoveScanner : IMoveScanner
     {
         /// <summary>
         /// Ищем доступные ходы для продолжения серии боев.
         /// </summary>
-        public List<Move> GetMovesForPiece(Chessboard board, IRulesStrategy rules, Point square)
+        public List<Move> GetMovesForPiece(IBoardNavigation board, IRulesStrategy rules, Point square)
         {
             var context = new MoveScanContext(board, rules, ScanMode.CapturesOnly);
 
@@ -25,7 +24,7 @@ namespace Checkers.Engine.Scanning
         /// <summary>
         /// Ищем всех доступные ходы для выбранной стороны.
         /// </summary>
-        public List<Move> GetMovesForSide(Chessboard board, IRulesStrategy rules, PieceSide side)
+        public List<Move> GetMovesForSide(IBoardNavigation board, IRulesStrategy rules, PieceSide side)
         {
             var context = new MoveScanContext(board, rules, ScanMode.All);
 
