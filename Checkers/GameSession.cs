@@ -39,7 +39,6 @@ namespace Checkers.Engine
     public class GameSession
     {
         private Chessboard _board;
-        private TurnExecutor _executor;
         private readonly IRulesStrategy _rules;
         private readonly MoveScanner _scanner;
 
@@ -105,7 +104,7 @@ namespace Checkers.Engine
                 throw new InvalidOperationException("Указанный ход не входит в список допустимых перемещений.");
 
             // Выполнение перемещения
-            bool chainAllowed = _rules.ProcessStep(_executor, move);
+            bool chainAllowed = _rules.ProcessStep(_board, move);
             _currentTurn.Steps.Add(move);
 
             // Сбрасываем устаревший кэш
@@ -114,7 +113,7 @@ namespace Checkers.Engine
             // Если серия по правилам не может быть продолжена или нет доступных ходов для продолжения
             if (chainAllowed is false || GetValidMoves(side) is [])
             {
-                _rules.OnFinalize(_executor, _currentTurn.Steps[^1].To);
+                _rules.OnFinalize(_board, _currentTurn.Steps[^1].To);
                 _currentTurn.IsCompleted = true;
                 PrepareNextTurn();
             }
@@ -216,12 +215,11 @@ namespace Checkers.Engine
         /// Синхронизирует физическое состояние доски с историей ходов.
         /// Полностью пересоздает игровое поле и проигрывает все совершенные действия.
         /// </summary>
-        [MemberNotNull(nameof(_board), nameof(_executor))]
+        [MemberNotNull(nameof(_board))]
         private void RebuildBoard()
         {
             var settings = _rules.GetSettings();
             _board = new Chessboard(settings.Rows, settings.Cols, settings.UseEvenSquares);
-            _executor = new TurnExecutor(_board);
             _cachedMoves = null;
 
             // Расстановка фигур согласно начальной позиции правил
@@ -235,12 +233,12 @@ namespace Checkers.Engine
             {
                 foreach (var move in turn.Steps)
                 {
-                    _rules.ProcessStep(_executor, move);
+                    _rules.ProcessStep(_board, move);
                 }
 
                 if (turn is { IsCompleted: true, Steps: [.., var lastStep] })
                 {
-                    _rules.OnFinalize(_executor, lastStep.To);
+                    _rules.OnFinalize(_board, lastStep.To);
                 }
             }
         }
@@ -252,6 +250,7 @@ namespace Checkers.Engine
         {
             // Сбрасываем устаревший кэш
             _cachedMoves = null;
+
             var nextSide = _currentTurn.Side == PieceSide.White ? PieceSide.Black : PieceSide.White;
 
             _currentTurn = new Turn(nextSide);
@@ -268,14 +267,14 @@ namespace Checkers.Engine
                     return;
                 }
 
-                switch (_rules.HandleNoMoves(nextSide, _board))
+                switch (_rules.HandleNoMoves(_board, nextSide))
                 {
                     case TurnResult.SwitchSide:
                         PrepareNextTurn();
                         break;
 
                     case TurnResult.GameFinished:
-                        var final = _rules.JudgeTerminalState(nextSide, _board);
+                        var final = _rules.JudgeTerminalState(_board, nextSide);
                         _status = final.Status;
                         _endReason = final.Reason;
                         break;

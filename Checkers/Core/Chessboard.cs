@@ -14,7 +14,7 @@ namespace Checkers.Engine.Core
     /// Представляет игровое поле для игры в шашки в виде матрицы.
     /// Отвечает за геометрию доски и физическое манипулирование фигурами.
     /// </summary>
-    public class Chessboard
+    internal sealed class Chessboard : ITurnExecution, IBoardInspection, IBoardNavigation
     {
         /// <summary> Количество рядов на доске. </summary>
         public int Rows { get; }
@@ -209,6 +209,23 @@ namespace Checkers.Engine.Core
                 if (piece.IsCaptured)
                     _squares[square.Row, square.Col] = null;
             }
+        }
+
+        #endregion
+
+        #region ITurnExecution
+
+        void ITurnExecution.ApplyMove(Move move) => Execute(move);
+        void ITurnExecution.ApplyCaptureMark(Point target) => MarkAsCaptured(target);
+        void ITurnExecution.ApplyPromotion(Point target) => Transform(target);
+        void ITurnExecution.ApplyPromotionMark(Point target) => MarkAsPromoted(target);
+        void ITurnExecution.ApplyRemoval() => RemoveCapturedPieces();
+        void ITurnExecution.ApplyRemoval(Point target) => Remove(target);
+        void ITurnExecution.ApplyFinalEffects() => SettleTurn();
+        bool ITurnExecution.CanPromote(Point square)
+        {
+            TryGetPiece(square, out var piece);
+            return piece is not null && IsPromotionEdge(square, piece.Side);
         }
 
         #endregion

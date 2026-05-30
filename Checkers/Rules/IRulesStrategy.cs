@@ -1,5 +1,4 @@
-﻿using Checkers.Engine.Core;
-using Checkers.Engine.Models;
+﻿using Checkers.Engine.Models;
 using Checkers.Engine.Scanning;
 
 namespace Checkers.Engine.Rules
@@ -105,23 +104,25 @@ namespace Checkers.Engine.Rules
         /// True — дальнейшее сканирование возможно (например если правила позволяют соверша серию взятий). 
         /// False — дальнейшее сканирование не требуется (например если совершен тихий ход).
         /// </returns>
-        bool ProcessStep(ITurnActions actions, Move move);
+        bool ProcessStep(ITurnExecution actions, Move move);
 
         /// <summary>
         /// Выполняет финальные действия в конце всего хода (массовое снятие фигур, отложенные дамки).
         /// </summary>
-        void OnFinalize(ITurnActions actions, Point lastPostion);
+        void OnFinalize(ITurnExecution actions, Point lastPostion);
 
         /// <summary>
         /// Решает, что делать, если у текущего игрока нет доступных ходов.
         /// </summary>
-        /// <param name="side">Сторона, у которой нет ходов.</param>
         /// <param name="board">Текущее состояние доски.</param>
-        TurnResult HandleNoMoves(PieceSide side, Chessboard board);
+        /// <param name="side">Сторона, у которой нет ходов.</param>
+        TurnResult HandleNoMoves(IBoardInspection board, PieceSide side);
 
         /// <summary>
         /// Выносит окончательный технический вердикт о результате игры.
         /// </summary>
-        GameResult JudgeTerminalState(PieceSide side, Chessboard board);
+        /// <param name="board">Текущее состояние доски.</param>
+        /// <param name="side">Сторона, на которой закончена игра.</param>
+        GameResult JudgeTerminalState(IBoardInspection board, PieceSide side);
     }
 }

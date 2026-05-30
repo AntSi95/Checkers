@@ -1,5 +1,4 @@
-﻿using Checkers.Engine.Core;
-using Checkers.Engine.Models;
+﻿using Checkers.Engine.Models;
 using Checkers.Engine.Scanning;
 
 namespace Checkers.Engine.Rules.Variants
@@ -69,7 +68,7 @@ namespace Checkers.Engine.Rules.Variants
         }
 
         /// <inheritdoc />
-        public bool ProcessStep(ITurnActions actions, Move move)
+        public bool ProcessStep(ITurnExecution actions, Move move)
         {
             actions.ApplyMove(move);
 
@@ -87,7 +86,7 @@ namespace Checkers.Engine.Rules.Variants
         }
 
         /// <inheritdoc />
-        public void OnFinalize(ITurnActions actions, Point lastPostion)
+        public void OnFinalize(ITurnExecution actions, Point lastPostion)
         {
             // Здесь решается "Дамка или нет" для международных:
             // Если остановились на краю — превращаем.
@@ -97,10 +96,10 @@ namespace Checkers.Engine.Rules.Variants
         }
 
         /// <inheritdoc />
-        public TurnResult HandleNoMoves(PieceSide side, Chessboard board) => TurnResult.GameFinished;
+        public TurnResult HandleNoMoves(IBoardInspection board, PieceSide side) => TurnResult.GameFinished;
 
         /// <inheritdoc />
-        public GameResult JudgeTerminalState(PieceSide side, Chessboard board)
+        public GameResult JudgeTerminalState(IBoardInspection board, PieceSide side)
         {
             var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
             return new GameResult(winner, GameEndReason.NoAvailableMoves);

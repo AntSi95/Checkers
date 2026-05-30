@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Checkers.Engine.Core;
 using Checkers.Engine.Models;
 using Checkers.Engine.Rules;
 
@@ -50,7 +49,7 @@ namespace Checkers.Engine.Scanning
     /// </remarks>
     internal class MoveScanContext
     {
-        public Chessboard Board { get; }
+        public IBoardNavigation Board { get; }
         public IRulesStrategy Rules { get; }
         /// <summary>
         /// Список найденных ходов, накапливает в себе ходы при каждой смене проверяемого направления или фигуры
@@ -79,7 +78,7 @@ namespace Checkers.Engine.Scanning
         private Point _step;
 
 
-        public MoveScanContext(Chessboard board, IRulesStrategy rules, ScanMode mode)
+        public MoveScanContext(IBoardNavigation board, IRulesStrategy rules, ScanMode mode)
         {
             Board = board;
             Rules = rules;
