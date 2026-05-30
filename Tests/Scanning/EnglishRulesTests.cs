@@ -2,7 +2,7 @@
 using Checkers.Engine.Rules.Variants;
 using Checkers.Engine.Scanning;
 
-namespace Checkers.Engine.Tests.Scaning
+namespace Checkers.Engine.Tests.Scanning
 {
     public class EnglishRulesTests
     {
@@ -17,7 +17,7 @@ namespace Checkers.Engine.Tests.Scaning
             var ray = RayDirection.DownLeft; // Назад для белых
 
             // Act
-            // Мы договорились, что в Чекерсе пешка для луча назад возвращает (false, false) сразу
+            // В Чекерсе пешка для луча назад возвращает (false, false) сразу
             var verdict = _rules.EvaluateMove(_whiteMan, ray, ScanState.TargetDetected, 2, false);
 
             // Assert

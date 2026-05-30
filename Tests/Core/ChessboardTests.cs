@@ -1,7 +1,7 @@
 ﻿using Checkers.Engine.Core;
 using Checkers.Engine.Models;
 
-namespace Checkers.Engine.Tests.GameObjects
+namespace Checkers.Engine.Tests.Core
 {
     public class ChessboardTests
     {
@@ -74,11 +74,11 @@ namespace Checkers.Engine.Tests.GameObjects
         [Fact]
         public void Move_ShouldRelocatePiece_Correctly()
         {
-            // Arrange
-            var board = new Chessboard(8, 8);
+            // Arrange: Используем валидные физические клетки нижнего белого фланга (0,0) и (1,1)
+            var board = new Chessboard(8, 8, useEvenSquares: true);
             var piece = new Piece(PieceSide.White, PieceType.Man);
-            var from = new Point(5, 5);
-            var to = new Point(4, 4);
+            var from = new Point(0, 0);
+            var to = new Point(1, 1);
             board.PlacePiece(from, piece);
 
             // Act

@@ -2,11 +2,10 @@
 using Checkers.Engine.Rules.Variants;
 using Checkers.Engine.Scanning;
 
-namespace Checkers.Engine.Tests.Scaning
+namespace Checkers.Engine.Tests.Scanning
 {
     public class RussianRulesTests
     {
-        // Не забудь, что теперь RussianRules требует Scanner в конструкторе (если ты не отвязал его окончательно)
         private readonly RussianRules _rules = new();
         private readonly Piece _whiteMan = new(PieceSide.White, PieceType.Man);
 
@@ -77,7 +76,7 @@ namespace Checkers.Engine.Tests.Scaning
             bool result = _rules.IsEnemy(whiteMan, blackMan);
 
             // Assert
-            // Несмотря на то, что цвета разные, результат должен быть false,
+            // Несмотря на то, что цвета разные, result должен быть false,
             // так как нельзя бить одну и ту же фигуру дважды за серию.
             Assert.False(result, "Правила не должны позволять захват уже помеченной фигуры (Турецкий удар)");
         }
