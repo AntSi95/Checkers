@@ -47,7 +47,7 @@ namespace Checkers.Engine.Scanning
     /// 2. Автомат состояний сканирования (обнаружение целей, подтверждение приземлений).
     /// 3. Агрегация результатов (фильтрация и накопление списка валидных перемещений).
     /// </remarks>
-    internal class MoveScanContext
+    internal sealed class MoveScanContext
     {
         public IBoardNavigation Board { get; }
         public IRulesStrategy Rules { get; }

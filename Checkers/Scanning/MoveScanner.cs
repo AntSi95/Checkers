@@ -6,7 +6,7 @@ namespace Checkers.Engine.Scanning
     /// <summary>
     /// Механизм поиска доступных ходов, производящий последовательное сканирование клеток/диагоналей/фигур.
     /// </summary>
-    public class MoveScanner
+    public sealed class MoveScanner : IMoveScanner
     {
         /// <summary>
         /// Ищем доступные ходы для продолжения серии боев.

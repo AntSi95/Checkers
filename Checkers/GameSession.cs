@@ -40,7 +40,7 @@ namespace Checkers.Engine
     {
         private Chessboard _board;
         private readonly IRulesStrategy _rules;
-        private readonly MoveScanner _scanner;
+        private readonly IMoveScanner _scanner;
 
         private readonly List<Turn> _history = [];
         private Turn _currentTurn;
@@ -67,7 +67,7 @@ namespace Checkers.Engine
         /// </summary>
         /// <param name="rules">Стратегия правил (например, RussianRules).</param>
         /// <param name="scanner">Инструмент для поиска доступных ходов на доске.</param>
-        public GameSession(IRulesStrategy rules, MoveScanner scanner)
+        public GameSession(IRulesStrategy rules, IMoveScanner scanner)
         {
             _rules = rules;
             _scanner = scanner;
