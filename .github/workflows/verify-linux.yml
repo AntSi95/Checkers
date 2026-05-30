@@ -1,0 +1,31 @@
+name: .NET Core Build & Test (Linux Verification)
+
+on:
+  push:
+    branches: [ "master", "main", "develop", "feature/*", "refactor/*" ]
+  pull_request:
+    branches: [ "master", "main", "develop" ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Solution
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Run Unit Tests
+      run: dotnet test --no-build --configuration Release --verbosity normal
