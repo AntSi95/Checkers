@@ -3,7 +3,7 @@ using Checkers.Engine.Models;
 using Checkers.Engine.Rules.Variants;
 using Checkers.Engine.Scanning;
 
-namespace Checkers.Engine.Tests.Scaning
+namespace Checkers.Engine.Tests.Scanning
 {
     public class InternationalRulesTests
     {
@@ -37,27 +37,26 @@ namespace Checkers.Engine.Tests.Scaning
         public void Man_ShouldNotPromoteInMiddleOfCaptureSeries()
         {
             // Arrange
-            // Нам нужен настоящий Executor или его Mock, так как метод CanPromote полезет в доску
-            var board = new Chessboard(10, 10);
+            var board = new Chessboard(10, 10, useEvenSquares: true);
 
-            // Ставим белую шашку на пред-дамочную линию
-            var start = new Point(2, 2);
-            var end = new Point(0, 4); // Допустим, это край для белых
-            var target = new Point(1, 3);
+            var start = new Point(7, 3);
+            var end = new Point(9, 5); // Row == 9 — крайняя дамочная линия для белых фигурок
+            var target = new Point(8, 4);
 
-            board.PlacePiece(start, new Piece(PieceSide.White, PieceType.Man));
+            var piece = new Piece(PieceSide.White, PieceType.Man);
+            board.PlacePiece(start, piece);
             board.PlacePiece(target, new Piece(PieceSide.Black, PieceType.Man));
 
             var move = new Move(start, end, target);
 
             // Act
-            // В международных шашках ProcessStep возвращает true, если был бой.
-            // Но он НЕ должен менять тип фигуры на King немедленно.
             bool canContinue = _rules.ProcessStep(board, move);
 
             // Assert
             Assert.True(canContinue);
-            Assert.Equal(PieceType.Man, board[end]?.Type); // Фигура всё еще шашка, а не дамка!
+
+            board.TryGetPiece(end, out var resultPiece);
+            Assert.Equal(PieceType.Man, resultPiece?.Type); // Фигура всё еще шашка, а не дамка!
         }
 
         [Fact]
@@ -77,19 +76,18 @@ namespace Checkers.Engine.Tests.Scaning
         public void OnFinalize_ShouldPromoteMan_OnlyAtEndOfTurn()
         {
             // Arrange
-            var board = new Chessboard(10, 10);
-            var endPoint = new Point(0, 4); // Край поля для белых
+            var board = new Chessboard(10, 10, useEvenSquares: true);
+            var endPoint = new Point(9, 5); // Row == 9 — дамочный край для белых
 
             // Ставим белую шашку на край
             board.PlacePiece(endPoint, new Piece(PieceSide.White, PieceType.Man));
 
             // Act
-            // Вызываем финализацию, передавая точку, где "замерла" фигура
             _rules.OnFinalize(board, endPoint);
 
             // Assert
-            // Теперь, после финализации, она должна стать дамкой
-            Assert.Equal(PieceType.King, board[endPoint]?.Type);
+            board.TryGetPiece(endPoint, out var resultPiece);
+            Assert.Equal(PieceType.King, resultPiece?.Type); // После финализации она обязана стать дамкой
         }
     }
 }

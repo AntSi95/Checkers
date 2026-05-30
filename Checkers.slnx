@@ -8,8 +8,6 @@
     <File Path="doc/USER_GUIDE.md" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="Checkers/Сheckers.Engine.csproj" />
-  <Project Path="Tests/Сheckers.Engine.Tests.csproj" Id="d8e07fc6-7f93-4997-b579-b476143b32a6">
-    <BuildDependency Project="Checkers/Сheckers.Engine.csproj" />
-  </Project>
+  <Project Path="Checkers/Checkers.Engine.csproj" />
+  <Project Path="Tests/Checkers.Engine.Tests.csproj" />
 </Solution>

@@ -56,9 +56,9 @@ sequenceDiagram
 Ниже представлен готовый класс, демонстрирующий полный цикл взаимодействия внешнего слоя с фасадом `GameSession` в **Stateless-парадигме** [INDEX]. Код наглядно иллюстрирует фазы инициализации, предварительной проверки, обработки шага (включая многоходовую серию) и финального экспорта данных для сохранения [INDEX].
 
 ```csharp
-using checkers.GameObjects;
-using checkers.GameObjects.Rules;
-using checkers.GameObjects.Scanning;
+using Сheckers.Engine;
+using Сheckers.Engine.Scanning;
+using Сheckers.Engine.Rules.Variants;
 
 public class GameTransactionWorkflow
 {
@@ -287,7 +287,7 @@ public class MyCustomRules : IRulesStrategy
     }
 
     // === ГРУППА 3: УПРАВЛЕНИЕ ШАГОМ И ФИНАЛИЗАЦИЯ ===
-    public bool ProcessStep(ITurnActions actions, Move move)
+    public bool ProcessStep(ITurnExecution actions, Move move)
     {
         actions.ApplyMove(move);
         if (move.Target.HasValue)
@@ -298,7 +298,7 @@ public class MyCustomRules : IRulesStrategy
         return false;
     }
 
-    public void OnFinalize(ITurnActions actions, Point finalSquare)
+    public void OnFinalize(ITurnExecution actions, Point finalSquare)
     {
         if (actions.CanPromote(finalSquare))
         {
@@ -308,9 +308,9 @@ public class MyCustomRules : IRulesStrategy
     }
 
     // === ГРУППА 4: СУДЕЙСТВО (ФИНАЛ) ===
-    public TurnResult HandleNoMoves(PieceSide side, Chessboard board) => TurnResult.GameFinished;
+    public TurnResult HandleNoMoves(PieceSide side, IBoardInspection board) => TurnResult.GameFinished;
 
-    public GameResult JudgeTerminalState(PieceSide side, Chessboard board)
+    public GameResult JudgeTerminalState(PieceSide side, IBoardInspection board)
     {
         var winner = side == PieceSide.White ? GameStatus.BlackWin : GameStatus.WhiteWin;
         return new GameResult(winner, GameEndReason.NoAvailableMoves);

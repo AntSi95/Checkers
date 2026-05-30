@@ -17,181 +17,156 @@
 Ниже представлен чистый код класса правил, полностью интегрированный с системами `MoveScanner` и `GameSession`:
 
 ```csharp
-using checkers.GameObjects;
-using checkers.GameObjects.Rules;
-using checkers.GameObjects.Scanning;
+using Checkers.Engine.Models;
+using Checkers.Engine.Scanning;
 
-namespace checkers.Core.Rules;
-
-public class RussianRules : IRulesStrategy
+namespace Checkers.Engine.Rules.Variants
 {
-    #region Методы создания игрового поля
-
-    // Задаем параметры доски: 8 рядов, 8 столбцов, играем на темных (четных) клетках
-    public BoardSettings GetSettings() => new BoardSettings(8, 8, UseEvenSquares: true);
-
-    // Выполняем стартовую расстановку шашек на доске
-    public IEnumerable<StartPosition> GetInitialPositions()
+    public class RussianRules : IRulesStrategy
     {
-        // Традиционная расстановка: 3 ряда черных (сверху), 3 ряда белых (снизу)
-        var positions = new List<StartPosition>();
-        for (int r = 0; r < 8; r++)
+        #region методы создания игрового поля
+
+        // Задаем параметры доски: 8 рядов, 8 столбцов, играем на темных (четных) клетках
+        public BoardSettings GetSettings() => new(8, 8, UseEvenSquares: true);
+
+        // Выполняем стартовую расстановку шашек на доске
+        public IEnumerable<StartPosition> GetInitialPositions()
         {
-            for (int c = (r % 2 == 0 ? 1 : 0); c < 8; c += 2)
+            // Традиционная расстановка: 3 ряда белых (снизу), 3 ряда черных (сверху)
+            // Внизу доски находятся первые ряды
+            var positions = new List<StartPosition>(24);
+
+            for (int row = 0; row < 3; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.White, PieceType.Man));
+            for (int row = 5; row < 8; row++)
+                for (int col = (row % 2); col < 8; col += 2)
+                    positions.Add(new StartPosition(new Point(row, col), PieceSide.Black, PieceType.Man));
+            return positions;
+        }
+
+        #endregion
+
+        #region методы сканирования
+
+        // Проверяет, является ли фигура целью для атаки
+        public bool IsEnemy(Piece actor, Piece target)
+        {
+            // Турецкий удар: нельзя бить ту же фигуру второй раз за серию
+            return actor.Side != target.Side && !target.IsCaptured;
+        }
+
+        // Главный судейский метод: оценивает каждую клетку на пути диагонального луча
+        public ScanVerdict EvaluateMove(Piece actor, RayDirection ray, ScanState state, int distance, bool isOccupied)
+        {
+            bool isForward = ray.IsForwardFor(actor.Side);
+
+            if (actor.Type == PieceType.Man)
             {
-                // Первые три ряда (0, 1, 2) заполняем черными фигурами
-                if (r < 3) positions.Add(new StartPosition(new Point(r, c), PieceSide.Black, PieceType.Man));
-                
-                // Последние три ряда (5, 6, 7) заполняем белыми фигурами
-                if (r > 4) positions.Add(new StartPosition(new Point(r, c), PieceSide.White, PieceType.Man));
+                return state switch
+                {
+                    // Тихий ход: 1 клетка вперед. 
+                    // Если занято (isOccupied) — возвращаем (false, true), чтобы сканер проверил фигуру на "враждебность".
+                    ScanState.Default => new ScanVerdict(
+                        IsPossible: distance == 1 && isForward && !isOccupied,
+                        CanContinue: isOccupied && distance == 1 // Если пусто — можно было бы идти дальше (но у пешки лимит 1), если занято — стоп для пешки, но шанс для IsEnemy
+                    ),
+
+                    // Режим поиска боя: саму пустую клетку подтвердить нельзя, 
+                    // но луч продолжаем, пока не встретим цель (на расстоянии 1).
+                    ScanState.ForcedCaptureOnly => new ScanVerdict(
+                        IsPossible: false,
+                        CanContinue: isOccupied && distance == 1
+                    ),
+
+                    // Фаза прыжка: приземление строго на дистанции 2 (сразу за врагом).
+                    ScanState.TargetDetected => new ScanVerdict(
+                        IsPossible: !isOccupied && distance == 2,
+                        CanContinue: false // После взятия/не удачной попытки сканировать уже нечего
+                    ),
+
+                    _ => new ScanVerdict(false, false)
+                };
             }
-        }
-        return positions;
-    }
-
-    #endregion
-
-    #region Методы сканирования
-
-    // Проверяет, является ли фигура целью для атаки
-    public bool IsEnemy(Piece actor, Piece target)
-    {
-        // Фигура должна принадлежать оппоненту.
-        // Эффект "Турецкого удара": нельзя бить ту же фигуру второй раз за серию (у нее IsCaptured == true)
-        return actor.Side != target.Side && !target.IsCaptured;
-    }
-
-    // Главный судейский метод: оценивает каждую клетку на пути диагонального луча
-    public ScanVerdict EvaluateMove(Piece actor, RayDirection ray, ScanState state, int distance, bool isOccupied)
-    {
-        bool isForward = ray.IsForwardFor(actor.Side);
-
-        // --- ВЕТКА СУДЕЙСТВА ДЛЯ ПРОСТОЙ ШАШКИ (Пешки) ---
-        if (actor.Type == PieceType.Man)
-        {
-            return state switch
+            else if (actor.Type == PieceType.King)
             {
-                // Фаза Default: Обычный поиск ходов (ситуация на доске спокойная)
-                // - Тихий ход: разрешен строго на 1 клетку вперед и только если она пуста (!isOccupied).
-                // - Если клетка занята (isOccupied) на расстоянии 1: возвращаем (IsPossible: false, CanContinue: true).
-                //   Это заставляет сканер остановиться для простой шашки, но передает клетку методу IsEnemy для проверки на бой.
-                ScanState.Default => new ScanVerdict(
-                    IsPossible: distance == 1 && isForward && !isOccupied,
-                    CanContinue: isOccupied && distance == 1
-                ),
+                return state switch
+                {
+                    // Тихий ход: разрешен на любую дистанцию, пока путь пуст.
+                    ScanState.Default => new ScanVerdict(
+                        IsPossible: !isOccupied,
+                        CanContinue: true
+                    ),
 
-                // Фаза ForcedCaptureOnly: В сессии обнаружен обязательный бой.
-                // Саму пустую клетку подтвердить как ход нельзя (IsPossible: false).
-                // Но луч продолжаем сканировать строго до расстояния 1, чтобы дать сканеру шанс наткнуться на фигуру врага.
-                ScanState.ForcedCaptureOnly => new ScanVerdict(
-                    IsPossible: false,
-                    CanContinue: isOccupied && distance == 1
-                ),
+                    // Дамка ищет врага "вдалеке": скользим по пустым клеткам.
+                    ScanState.ForcedCaptureOnly => new ScanVerdict(
+                        IsPossible: false,
+                        CanContinue: true
+                    ),
 
-                // Фаза TargetDetected: На предыдущем шаге луча сканер зафиксировал врага.
-                // Приземление для простой шашки возможно строго на дистанции 2 (сразу за врагом) и клетка должна быть пуста.
-                // После этого сканировать этот луч для пешки больше бессмысленно (CanContinue: false).
-                ScanState.TargetDetected => new ScanVerdict(
-                    IsPossible: !isOccupied && distance == 2,
-                    CanContinue: false
-                ),
+                    // После обнаружения цели (TargetDetected) или совершения прыжка (CaptureMoveFound)
+                    // Дамка может приземлиться на любую пустую клетку и лететь дальше.
+                    ScanState.TargetDetected or ScanState.CaptureMoveFound => new ScanVerdict(
+                        IsPossible: !isOccupied,
+                        CanContinue: !isOccupied
+                    ),
 
-                _ => new ScanVerdict(false, false)
-            };
+                    _ => new ScanVerdict(false, false)
+                };
+            }
+
+            return new ScanVerdict(false, false);
         }
-        // --- ВЕТКА СУДЕЙСТВА ДЛЯ ДАМКИ (Короля) ---
-        else if (actor.Type == PieceType.King)
+
+        #endregion
+
+        #region методы реализации хода
+
+        // Управляет физическим выполнением шага и фиксирует его последствия
+        public bool ProcessStep(ITurnExecution actions, Move move)
         {
-            return state switch
+            actions.ApplyMove(move);
+
+            if (move.IsCapture)
             {
-                // Фаза Default: Обычный поиск ходов.
-                // Дамка может ходить на любую дистанцию, пока траектория луча абсолютно пуста (!isOccupied).
-                ScanState.Default => new ScanVerdict(
-                    IsPossible: !isOccupied,
-                    CanContinue: true
-                ),
+                actions.ApplyCaptureMark(move.Target!.Value);
 
-                // Фаза ForcedCaptureOnly: Дамка ищет врага "вдалеке".
-                // Сами пустые клетки игнорируются, но сканер беспрепятственно скользит по лучу дальше (CanContinue: true).
-                ScanState.ForcedCaptureOnly => new ScanVerdict(
-                    IsPossible: false,
-                    CanContinue: true
-                ),
+                // В русских шашках шашка ставится дамкой сразу, если наступили на край поля
+                if (actions.CanPromote(move.To))
+                    actions.ApplyPromotion(move.To);
 
-                // Фазы TargetDetected (враг обнаружен) или CaptureMoveFound (прыжок уже подтвержден).
-                // Дальнобойная дамка имеет право приземлиться на ЛЮБУЮ пустую клетку позади сбитой фигуры 
-                // и продолжать скользить дальше по лучу, выбирая удобную точку для остановки.
-                ScanState.TargetDetected or ScanState.CaptureMoveFound => new ScanVerdict(
-                    IsPossible: !isOccupied,
-                    CanContinue: !isOccupied
-                ),
+                return true; // Был бой, сессия должна проверить продолжение
+            }
 
-                _ => new ScanVerdict(false, false)
-            };
-        }
-
-        return new ScanVerdict(false, false);
-    }
-
-    #endregion
-
-    #region Методы реализации хода
-
-    // Управляет физическим выполнением шага и фиксирует его последствия
-    public bool ProcessStep(ITurnActions actions, Move move)
-    {
-        // Физически передвигаем фигуру на целевую клетку
-        actions.ApplyMove(move);
-
-        // Сценарий А: Шаг является прыжком-взятием
-        if (move.IsCapture)
-        {
-            // Вешаем на срубленную фигуру маркер захвата (отложенное удаление)
-            actions.ApplyCaptureMark(move.Target!.Value);
-
-            // Механика «превращения в полете»: если шашка наступила на край доски в середине серии прыжков,
-            // она мгновенно повышается до дамки и сможет продолжить бой в этой же сессии.
+            // Тихий ход: просто проверяем дамку в конце пути
             if (actions.CanPromote(move.To))
                 actions.ApplyPromotion(move.To);
 
-            return true; // Возвращаем true — был бой, сессия обязана запустить сканер для проверки продолжения серии
+            return false; // Тихий ход — серия невозможна
         }
 
-        // Сценарий Б: Обычный тихий ход. 
-        // Просто проверяем, достигла ли шашка края доски в конце своего пути, чтобы стать дамкой.
-        if (actions.CanPromote(move.To))
-            actions.ApplyPromotion(move.To);
+        // Вызывается один раз, когда игрок полностью завершил все действия своего хода
+        public void OnFinalize(ITurnExecution actions, Point lastPostion) => actions.ApplyFinalEffects();
 
-        return false; // Тихий ход — продолжение серии прыжков невозможно
+        #endregion
+
+        #region методы глобальных игровых правил
+
+        // Определяет поведение системы, если у текущего игрока полностью закончились ходы
+        public TurnResult HandleNoMoves(IBoardInspection board, PieceSide side) => TurnResult.GameFinished;
+
+        // Выносит окончательный технический вердикт о результатах завершенной партии
+        public GameResult JudgeTerminalState(IBoardInspection board, PieceSide side)
+        {
+            //TODO: доработать как метод так и GameResult. Сейчас делает слишком мало за слишком большие реурсы.
+            var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
+            bool hasPieces = board.GetValidSquares().Any(s => { board.TryGetPiece(s, out var p); return p?.Side == side; });
+
+            return new GameResult(winner, hasPieces ? GameEndReason.NoAvailableMoves : GameEndReason.AllPiecesCaptured);
+        }
+
+        #endregion
     }
-
-    // Вызывается один раз, когда игрок полностью завершил все действия своего хода
-    public void OnFinalize(ITurnActions actions, Point lastPosition)
-    {
-        // Запускаем отложенный конвейер: физически очищаем доску от всех сбитых за ход фигур
-        actions.ApplyFinalEffects();
-    }
-
-    #endregion
-
-    #region Методы глобальных игровых правил
-
-    // Определяет поведение системы, если у текущего игрока полностью закончились ходы
-    public TurnResult HandleNoMoves(PieceSide side, Chessboard board) => TurnResult.GameFinished;
-
-    // Выносит окончательный технический вердикт о результатах завершенной партии
-    public GameResult JudgeTerminalState(PieceSide side, Chessboard board)
-    {
-        // Заблокированный игрок признается проигравшим, право победы отдается оппоненту
-        var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
-        
-        // Анализируем причину финала: проверяем, остались ли у проигравшей стороны фигуры на доске
-        bool hasPieces = board.GetValidSquares().Any(p => board[p]?.Side == side);
-
-        // Если фигуры остались, но ходить некуда — это пат (NoAvailableMoves). Если фигур нет — тотальное уничтожение (AllPiecesCaptured).
-        return new GameResult(winner, hasPieces ? GameEndReason.NoAvailableMoves : GameEndReason.AllPiecesCaptured);
-    }
-
-    #endregion
 }
+
 ```
