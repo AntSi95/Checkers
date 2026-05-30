@@ -103,7 +103,9 @@ namespace Checkers.Engine.Rules.Variants
         public GameResult JudgeTerminalState(IBoardInspection board, PieceSide side)
         {
             var winner = (side == PieceSide.White) ? GameStatus.BlackWin : GameStatus.WhiteWin;
-            return new GameResult(winner, GameEndReason.NoAvailableMoves);
+            bool hasPieces = board.GetValidSquares().Any(s => { board.TryGetPiece(s, out var p); return p?.Side == side; });
+
+            return new GameResult(winner, hasPieces ? GameEndReason.NoAvailableMoves : GameEndReason.AllPiecesCaptured);
         }
     }
 }
